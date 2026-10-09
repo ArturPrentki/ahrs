@@ -1,0 +1,47 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "colcon",
+			"args": [
+				"build",
+				"--symlink-install",
+				"--event-handlers",
+				"console_cohesion+",
+				"--base-paths",
+				"/gardo_ws",
+				"--cmake-args",
+				"-DCMAKE_BUILD_TYPE=Debug",
+				"-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+			],
+			"problemMatcher": [
+				"$colcon-gcc"
+			],
+			"group": "build",
+			"label": "colcon: Colcon Build Debug"
+		},
+		{
+			"type": "colcon",
+			"args": [
+				"build",
+				"--symlink-install",
+				"--event-handlers",
+				"console_cohesion+",
+				"--base-paths",
+				"/gardo_ws",
+				"--cmake-args",
+				"-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+				"-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+				"-DCMAKE_PREFIX_PATH=/opt/unitree_robotics:${CMAKE_PREFIX_PATH}"
+			],
+			"problemMatcher": [
+				"$colcon-gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"label": "colcon: Colcon Build Release"
+		}
+	]
+}

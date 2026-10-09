@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="raibo2" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ==================== Materials ==================== -->
+  <material name="black">
+    <color rgba="0.05 0.05 0.05 1.0"/>
+  </material>
+  <material name="blue">
+    <color rgba="0.0 0.125 0.53 1.0"/>
+  </material>
+  <material name="white">
+    <color rgba="0.8 0.8 0.8 1"/>
+  </material>
+  <material name="light_gray">
+    <color rgba="0.55 0.55 0.55 1"/>
+  </material>
+
+  <!--Gazebo dummy root link -->
+  <link name="dummy_root"/>
+  
+  <!-- ==================== TORSO / Base Link ==================== -->
+  <link name="TORSO">
+    <inertial>
+      <origin xyz="-0.00656127 -0.00245156 0.04792171" rpy="0 0 0" />
+      <mass value="17.85853726" />
+      <inertia ixx="0.16133121" ixy="-0.02266443" ixz="-0.00329293" 
+               iyy="0.45026183" iyz="0.00163597" izz="0.57496634" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://gardo_description/meshes/TORSO.STL" />
+      </geometry>
+      <material name="light_gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.045" rpy="0 0 0" />
+      <geometry>
+        <box size="0.4200 0.28 0.105"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.0745 -0.0375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.410 0.030 0.060"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 -0.0745 -0.0375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.410 0.030 0.060"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="dummy_to_base" type="fixed">
+    <parent link="dummy_root"/>
+    <child link="TORSO"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <!-- ==================== XACRO MACROS FOR LEGS ==================== -->
+  
+  <!-- Hip Macro -->
+  <xacro:macro name="hip_link_and_joint" params="prefix joint_xyz col_y mass ix ixz iy iz axis_x">
+    <link name="${prefix}_HIP">
+      <inertial>
+        <origin xyz="-0.03352808 ${col_y} 0.00003383" rpy="0 0 0" />
+        <mass value="${mass}" />
+        <inertia ixx="${ix}" ixy="-0.00143781" ixz="${ixz}" iyy="${iy}" iyz="-0.00000298" izz="${iz}" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://gardo_description/meshes/${prefix}_HIP.STL" />
+        </geometry>
+        <material name="light_gray"/>
+      </visual>
+      <collision>
+        <origin rpy="1.57079632679 0 0" xyz="0 ${col_y} 0"/>
+        <geometry>
+          <cylinder length="0.17404" radius="0.0595"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_HAA" type="revolute">
+      <origin xyz="${joint_xyz}" rpy="0 0 0" />
+      <parent link="TORSO" />
+      <child link="${prefix}_HIP" />
+      <axis xyz="${axis_x} 0 0" />
+      <limit lower="-1.5708" upper="1.5708" effort="90.8558" velocity="30.0091" />
+      <dynamics damping="0.0" friction="0.0" rotor_inertia="0.022811353" />
+    </joint>
+  </xacro:macro>
+
+  <!-- Thigh Macro -->
+  <xacro:macro name="thigh_link_and_joint" params="prefix joint_y mass ix ixy ixz iy iyz iz">
+    <link name="${prefix}_THIGH">
+      <inertial>
+        <origin xyz="-0.00555044 ${joint_y/2} -0.02775098" rpy="0 0 0" />
+        <mass value="${mass}" />
+        <inertia ixx="${ix}" ixy="${ixy}" ixz="${ixz}" iyy="${iy}" iyz="${iyz}" izz="${iz}" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://gardo_description/meshes/${prefix}_THIGH.STL" />
+        </geometry>
+        <material name="blue"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="-0.04575 0 -0.20283"/>
+        <geometry>
+          <box size="0.05150 0.03446 0.23435"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_HFE" type="revolute">
+      <origin xyz="0 ${joint_y} 0" rpy="0 0 0" />
+      <parent link="${prefix}_HIP" />
+      <child link="${prefix}_THIGH" />
+      <axis xyz="0 1 0" />
+      <limit lower="-6.2832" upper="6.2832" effort="90.8558" velocity="30.0091" />
+      <dynamics damping="0.0" friction="0.0" rotor_inertia="0.022811353" />
+    </joint>
+  </xacro:macro>
+
+  <!-- Shank Macro -->
+  <xacro:macro name="shank_link_and_joint" params="prefix ixy iyz">
+    <link name="${prefix}_SHANK">
+      <inertial>
+        <origin xyz="-0.00047821 0.00002607 -0.07606014" rpy="0 0 0" />
+        <mass value="0.32743890" />
+        <inertia ixx="0.00335434" ixy="${ixy}" ixz="0.00002929" iyy="0.00336066" iyz="${iyz}" izz="0.00006285" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://gardo_description/meshes/${prefix}_SHANK.STL" />
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin rpy="0 1.528031849 0" xyz="0.00606 0 -0.08162"/>
+        <geometry>
+          <box size="0.2865 0.02586 0.029"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin rpy="0 1.688031849 0" xyz="0.00666 0 -0.26162"/>
+        <geometry>
+          <box size="0.0865 0.02686 0.031"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_KFE" type="revolute">
+      <origin xyz="0 0 -0.32" rpy="0 0 0" />
+      <parent link="${prefix}_THIGH" />
+      <child link="${prefix}_SHANK" />
+      <axis xyz="0 1 0" />
+      <limit lower="-2.6417" upper="-0.41469" effort="90.8558" velocity="30.0091" />
+      <dynamics damping="0.0" friction="0.0" rotor_inertia="0.022811353" />
+    </joint>
+  </xacro:macro>
+
+  <!-- Foot Macro -->
+  <xacro:macro name="foot_link_and_joint" params="prefix">
+    <link name="${prefix}_FOOT">
+      <inertial>
+        <origin xyz="0.00070079 0.00010019 0.00430738" rpy="0 0 0" />
+        <mass value="0.10268513" />
+        <inertia ixx="0.00002730" ixy="0.00000000" ixz="-0.00000058" iyy="0.00002753" iyz="0.00000003" izz="0.00003039" />
+      </inertial>
+      
+      <!-- Shift visual up by radius (0.0275) so link origin is at the bottom -->
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://gardo_description/meshes/${prefix}_FOOT.STL" />
+        </geometry>
+        <material name="white"/>
+      </visual>
+
+      <!-- Shift collision up by radius (0.0275) so link origin is at the bottom -->
+      <collision>
+        <origin rpy="1.57079632679 0 0" xyz="0 0 0"/>
+        <geometry>
+          <sphere radius="0.0275"/>
+        </geometry>
+        <material name="">
+          <contact name="${prefix}_FOOT_MATERIAL"/>
+        </material>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_S2F" type="fixed">
+      <!-- Keep your original joint length; the link origin is now shifted to the ground contact -->
+      <origin xyz="0 0 -0.30404017" rpy="0 0 0" />
+      <parent link="${prefix}_SHANK" />
+      <child link="${prefix}_FOOT" />
+      <axis xyz="0 0 0" />
+    </joint>
+  </xacro:macro>
+
+  <!-- Full Leg Assembly Wrapper Macro -->
+  <xacro:macro name="make_leg" params="prefix joint_xyz col_y hip_mass hip_ix hip_ixz hip_iy hip_iz thigh_y thigh_mass thigh_ix thigh_ixy thigh_ixz thigh_iy thigh_iyz thigh_iz shank_ixy shank_iyz axis_x">
+    <xacro:hip_link_and_joint prefix="${prefix}" joint_xyz="${joint_xyz}" col_y="${col_y}" mass="${hip_mass}" ix="${hip_ix}" ixz="${hip_ixz}" iy="${hip_iy}" iz="${hip_iz}" axis_x="${axis_x}" />
+    <xacro:thigh_link_and_joint prefix="${prefix}" joint_y="${thigh_y}" mass="${thigh_mass}" ix="${thigh_ix}" ixy="${thigh_ixy}" ixz="${thigh_ixz}" iy="${thigh_iy}" iyz="${thigh_iyz}" iz="${thigh_iz}" />
+    <xacro:shank_link_and_joint prefix="${prefix}" ixy="${shank_ixy}" iyz="${shank_iyz}" />
+    <xacro:foot_link_and_joint prefix="${prefix}" />
+  </xacro:macro>
+
+  <!-- ==================== LEG INSTANTIATIONS ==================== -->
+
+  <!-- Left Front (LF) Leg -->
+  <xacro:make_leg prefix="LF" joint_xyz="0.34740000 0.10150000 0.04350000" col_y="0.02652"
+                  hip_mass="1.95398841" hip_ix="0.00348543" hip_ixz="-0.00000041" hip_iy="0.00824115" hip_iz="0.00733533"
+                  thigh_y="0.09453000" thigh_mass="3.12189597" thigh_ix="0.02699740" thigh_ixy="-0.00084218" thigh_ixz="0.00244569" thigh_iy="0.02501054" thigh_iyz="-0.00419581" thigh_iz="0.00901983"
+                  shank_ixy="0.00000000" shank_iyz="0.00000162" axis_x="1" />
+
+  <!-- Right Front (RF) Leg -->
+  <xacro:make_leg prefix="RF" joint_xyz="0.34740000 -0.10150000 0.04350000" col_y="-0.02652"
+                  hip_mass="1.95398841" hip_ix="0.00348565" hip_ixz="0.00000079" hip_iy="0.00823964" hip_iz="0.00733359"
+                  thigh_y="-0.09453000" thigh_mass="3.12189613" thigh_ix="0.02697992" thigh_ixy="0.00084612" thigh_ixz="0.00244736" thigh_iy="0.02499526" thigh_iyz="0.00418673" thigh_iz="0.00902204"
+                  shank_ixy="0.00000000" shank_iyz="0.00000282" axis_x="1" />
+
+  <!-- Left Hind (LH) Leg -->
+  <xacro:make_leg prefix="LH" joint_xyz="-0.34740000 0.10150000 0.04350000" col_y="0.02652"
+                  hip_mass="1.95398841" hip_ix="0.00348543" hip_ixz="-0.00000041" hip_iy="0.00824115" hip_iz="0.00733533"
+                  thigh_y="0.09453000" thigh_mass="3.12189597" thigh_ix="0.02699858" thigh_ixy="-0.00084178" thigh_ixz="0.00244526" thigh_iy="0.02501151" thigh_iyz="-0.00419624" thigh_iz="0.00901962"
+                  shank_ixy="0.00000000" shank_iyz="0.00000162" axis_x="1" />
+
+  <!-- Right Hind (RH) Leg -->
+  <xacro:make_leg prefix="RH" joint_xyz="-0.34740000 -0.10150000 0.04350000" col_y="-0.02652"
+                  hip_mass="1.95398841" hip_ix="0.00348577" hip_ixz="0.00000001" hip_iy="0.00824040" hip_iz="0.00733422"
+                  thigh_y="-0.09453000" thigh_mass="3.12189613" thigh_ix="0.02697952" thigh_ixy="0.00084619" thigh_ixz="0.00244741" thigh_iy="0.02499506" thigh_iyz="0.00418663" thigh_iz="0.00902223"
+                  shank_ixy="0.00000001" shank_iyz="0.00000334" axis_x="1" />
+
+  <!-- ==================== SENSORS & AUXILIARY LINKS ==================== -->
+  
+  <link name="d430_front" model="d430" sensor="realsense430.xml" />
+  <joint name="d430_front_joint" type="fixed">
+    <origin rpy="0 0.872665 0" xyz="0.21916365308 0.00785000000 0.00348853910"/>
+    <parent link="TORSO"/>
+    <child link="d430_front"/>
+  </joint>
+
+  <link name="d430_rear" model="d430" sensor="realsense430.xml" />
+  <joint name="d430_rear_joint" type="fixed">
+    <origin rpy="0 0.872665 3.141592" xyz="-0.21933203618 -0.00785000000 0.00349467628"/>
+    <parent link="TORSO"/>
+    <child link="d430_rear"/>
+  </joint>
+
+  <link name="base_imu" model="Microstrain_3DM-*" sensor="imu.xml" />
+  <joint name="imu_joint" type="fixed">
+    <origin rpy="0. 0. 0." xyz="0. 0. 0."/>
+    <parent link="TORSO"/>
+    <child link="base_imu"/>
+  </joint>
+
+
+  <xacro:macro name="leg_control_interfaces" params="prefix">
+    <joint name="${prefix}_HAA">
+      <command_interface name="effort"/>
+      <state_interface name="position"/><state_interface name="velocity"/><state_interface name="effort"/>
+    </joint>
+    <joint name="${prefix}_HFE">
+      <command_interface name="effort"/>
+      <state_interface name="position"/><state_interface name="velocity"/><state_interface name="effort"/>
+    </joint>
+    <joint name="${prefix}_KFE">
+      <command_interface name="effort"/>
+      <state_interface name="position"/><state_interface name="velocity"/><state_interface name="effort"/>
+    </joint>
+  </xacro:macro>
+
+  <ros2_control name="GazeboSimSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+    <xacro:leg_control_interfaces prefix="LF" />
+    <xacro:leg_control_interfaces prefix="RF" />
+    <xacro:leg_control_interfaces prefix="LH" />
+    <xacro:leg_control_interfaces prefix="RH" />
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(find gardo_description)/config/gardo_controllers.yaml</parameters>
+      <parameters_from_ros>
+          <parameter name="use_sim_time" type="bool">true</parameter>
+      </parameters_from_ros>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="TORSO">
+    <sensor name="imu_sensor" type="imu">
+      <always_on>1</always_on>
+      <update_rate>1000</update_rate>
+      <visualize>true</visualize>
+      <topic>imu</topic>
+    </sensor>
+  </gazebo>
+  <gazebo>
+    <plugin filename="libgz-sim-imu-system.so" name="gz::sim::systems::Imu"/>
+  </gazebo>
+
+  <gazebo>
+    <plugin filename="libgz-sim-odometry-publisher-system.so" name="gz::sim::systems::OdometryPublisher">
+        <odom_frame>odom</odom_frame>
+        <robot_base_frame>TORSO</robot_base_frame>
+        <odom_publish_frequency>1000</odom_publish_frequency>
+        <odom_topic>odom</odom_topic>
+        <dimensions>3</dimensions>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin filename="libgz-sim-joint-state-publisher-system.so" name="gz::sim::systems::JointStatePublisher">
+    <topic>joint_states</topic>
+    </plugin>
+  </gazebo> 
+</robot>

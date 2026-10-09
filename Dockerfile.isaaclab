@@ -1,0 +1,52 @@
+FROM nvcr.io/nvidia/isaac-sim:6.0.1
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV ISAACSIM_PATH=/isaac-sim
+ENV ISAACLAB_PATH=/gardo_ws/IsaacLab
+
+ENV OMNI_KIT_ALLOW_ROOT=1
+ENV ACCEPT_EULA=Y
+ENV PRIVACY_CONSENT=N
+
+SHELL ["/bin/bash", "-c"]
+USER root
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    wget \
+    vim \
+    sudo \
+    build-essential \
+    cmake \
+    python3-venv \
+    libeigen3-dev \
+    clang \
+    llvm \
+    libomp-dev \
+    liburdfdom-dev \
+    liburdfdom-headers-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /gardo_ws
+
+# Clone Isaac Lab
+RUN git clone --recursive https://github.com/isaac-sim/IsaacLab.git ${ISAACLAB_PATH}
+
+WORKDIR ${ISAACLAB_PATH}
+
+# Create symlink for Isaac Lab to find Isaac Sim
+RUN ln -sf ${ISAACSIM_PATH} ${ISAACLAB_PATH}/_isaac_sim
+
+# Configure minimal shell variables without polluting Python site-packages
+RUN echo "export ISAACSIM_PATH=${ISAACSIM_PATH}" >> ~/.bashrc && \
+    echo "export ISAACLAB_PATH=${ISAACLAB_PATH}" >> ~/.bashrc && \
+    echo "export ROS_DISTRO=jazzy" >> ~/.bashrc && \
+    echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" >> ~/.bashrc && \
+    echo "export LD_LIBRARY_PATH=/isaac-sim/exts/isaacsim.ros2.core/jazzy/lib:\$LD_LIBRARY_PATH" >> ~/.bashrc && \
+    echo "alias isaaclab='${ISAACLAB_PATH}/isaaclab.sh'" >> ~/.bashrc
+
+RUN chmod +x isaaclab.sh
+RUN --mount=type=cache,target=/root/.cache/pip \
+    ./isaaclab.sh --install || (echo "Isaac Lab installation failed!" && exit 1)
+
+CMD ["/bin/bash"]

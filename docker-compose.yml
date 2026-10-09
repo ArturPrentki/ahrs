@@ -1,0 +1,37 @@
+services:
+  brains:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: gardo-brains-local:latest
+    container_name: gardo-brains
+
+    privileged: true
+    network_mode: host
+    ipc: host
+
+    runtime: nvidia
+
+    environment:
+      - ROS_DOMAIN_ID=1
+      - DISPLAY=${DISPLAY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - QT_X11_NO_MITSHM=1
+
+    volumes:
+      - ./src:/gardo_ws/src
+      - ./build:/gardo_ws/build
+      - ./install:/gardo_ws/install
+      - ./log:/gardo_ws/log
+      - ./policies:/gardo_ws/policies:ro
+      - ./.devcontainer:/gardo_ws/.devcontainer
+      - ./.vscode:/gardo_ws/.vscode
+      - /tmp/.X11-unix:/tmp/.X11-unix
+
+    command:
+      - /bin/bash
+      - -c
+      - sleep infinity
+

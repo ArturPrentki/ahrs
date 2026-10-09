@@ -1,0 +1,12 @@
+<library path="quadruped_estimators">
+  <class name="quadruped_estimators/CheaterEstimator"
+         type="quadruped_estimators::CheaterEstimator"
+         base_class_type="controller_interface::ChainableControllerInterface">
+    <description>Reads /odom and exports state to WBC.</description>
+  </class>
+  <class name="quadruped_estimators/ContactInEKFEstimator"
+         type="quadruped_estimators::ContactInEKFEstimator"
+         base_class_type="controller_interface::ChainableControllerInterface">
+    <description>Implements contact based INEKF and exports state to WBC.</description>
+  </class>
+</library>

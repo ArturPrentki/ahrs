@@ -1,0 +1,16 @@
+{
+  "name": "ROS2 Gardo2 Container",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "brains",
+  "workspaceFolder": "/gardo_ws",
+  "remoteUser": "root",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "llvm-vs-code-extensions.vscode-clangd",
+        "xaver.clang-format",
+        "Ranch-Hand-Robotics.rde-ros-2"
+      ]
+    }
+  }
+}

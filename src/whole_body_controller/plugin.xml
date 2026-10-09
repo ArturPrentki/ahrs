@@ -1,0 +1,9 @@
+<library path="whole_body_controller">
+  <class name="whole_body_controller/WBC" 
+         type="wbc::WBC" 
+         base_class_type="controller_interface::ControllerInterface">
+    <description>
+      Quadruped optimal controller for Gardo robot.
+    </description>
+  </class>
+</library>

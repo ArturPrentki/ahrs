@@ -1,0 +1,9 @@
+<library path="stand_up_pkg">
+  <class name="stand_up_pkg/DownThenStand" 
+         type="stand_up_pkg::DownThenStand" 
+         base_class_type="controller_interface::ControllerInterface">
+    <description>
+      Stand up robot into desired initial pose
+    </description>
+  </class>
+</library>
